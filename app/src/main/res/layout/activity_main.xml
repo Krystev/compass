@@ -12,7 +12,7 @@
         android:textColor="@android:color/black"
         android:layout_marginBottom="20dp"
         android:layout_marginTop="40dp"
-        android:text="@string/heading_0_0" />
+        android:text="@string/heading" />
 
     <ImageView
         android:id="@+id/img_compass"
