@@ -68,10 +68,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             gravity = lowPassFilterSensitive(event.values.clone(), gravity);
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+        }
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             geomagnetic = lowPassFilterSensitive(event.values.clone(), geomagnetic);
+        }
         if (gravity != null && geomagnetic != null) {
             float R[] = new float[9];
             float I[] = new float[9];
@@ -115,10 +117,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    protected float[] lowPassFilterSensitive(float[] input, float[] output ) {
-        if ( output == null ) return input;
+    protected float[] lowPassFilterSensitive(float[] input, float[] output) {
+        if (output == null) return input;
 
-        for ( int i=0; i<input.length; i++ ) {
+        for (int i = 0; i < input.length; i++) {
             output[i] = output[i] + ALPHA * (input[i] - output[i]);
         }
         return output;
