@@ -7,20 +7,18 @@
         android:id="@+id/txt_heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="40dp"
+        android:layout_centerVertical="true"
+        android:layout_margin="40dp"
+        android:layout_toRightOf="@+id/img_compass"
         android:text="@string/heading"
         android:textColor="@android:color/black"
         android:textSize="20sp" />
 
     <ImageView
         android:id="@+id/img_compass"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/txt_heading"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="40dp"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
         android:src="@drawable/compass" />
-
 </RelativeLayout>
