@@ -3,4 +3,8 @@
     <string name="heading_0">Heading: 0.0</string>
     <string name="heading">Heading: </string>
     <string name="degrees"> degrees</string>
+    <string name="no_magnetic_field_title">No magnetic field sensor</string>
+    <string name="cant_detect_magnetic">Can not detect magnetic field sensor on your device. Do you want to get direction by gps or network ?</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_ok">OK</string>
 </resources>

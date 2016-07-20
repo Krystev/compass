@@ -1,10 +1,14 @@
 package com.inveitix.android.compass;
 
+
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Display;
@@ -25,11 +29,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static final float PIVOT_Y_VALUE = 0.5f;
     static final float ALPHA = 0.05f;
 
+
     @BindView(R.id.txt_heading)
     TextView txtHeading;
     @BindView(R.id.img_compass)
     ImageView imgCompass;
-
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
@@ -37,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float[] gravity;
     private float[] geomagnetic;
     private Display display;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         this.accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         this.display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        if (magnetometer == null) {
+            noMagneticSensorDialog();
+        }
     }
 
     @Override
@@ -64,6 +72,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
+    }
+
+    public void noMagneticSensorDialog() {
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        alertDialog.setTitle(getString(R.string.no_magnetic_field_title));
+        alertDialog.setMessage(getString(R.string.cant_detect_magnetic));
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.btn_cancel),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.btn_ok),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getDirectionByGPS();
+                    }
+                });
+        alertDialog.show();
     }
 
     @Override
@@ -89,6 +118,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             animateCompass(degree);
             currentDegree = -degree;
         }
+
+    }
+
+    private void getDirectionByGPS() {
+        Intent intent = new Intent(this, DirectionActivity.class);
+        startActivity(intent);
     }
 
     private void animateCompass(float degree) {
