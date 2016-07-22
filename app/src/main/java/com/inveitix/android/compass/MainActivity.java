@@ -5,10 +5,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
@@ -19,11 +23,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
-    public static final int REVERSED_PORTRAIT = 180;
-    public static final int LANDSCAPE_DEGREES_DIFFERENCE = 90;
-    public static final float PIVOT_X_VALUE = 0.5f;
-    public static final float PIVOT_Y_VALUE = 0.5f;
-    static final float ALPHA = 0.05f;
+
+    private static final String TAG = "MainActivity";
+    private static final float ANIMATION_DELAY = 200;
+    private long lastAnimationTimestamp;
 
     @BindView(R.id.txt_heading)
     TextView txtHeading;
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accelerometer;
     private Sensor magnetometer;
     private float currentDegree;
+    private float currentImageDegree;
     private float[] gravity;
     private float[] geomagnetic;
     private Display display;
@@ -69,10 +73,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            gravity = lowPassFilterSensitive(event.values.clone(), gravity);
+            gravity = LocationCalculationHelper.lowPassFilterSensitive(event.values.clone(), gravity);
         }
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            geomagnetic = lowPassFilterSensitive(event.values.clone(), geomagnetic);
+            geomagnetic = LocationCalculationHelper.lowPassFilterSensitive(event.values.clone(), geomagnetic);
         }
         if (gravity != null && geomagnetic != null) {
             float R[] = new float[9];
@@ -82,67 +86,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float orientation[] = new float[3];
             SensorManager.getOrientation(R, orientation);
             if (success) {
-                getDegreesByRotation(orientation);
+                currentDegree = LocationCalculationHelper.getDegreesByRotation(display.getRotation(), orientation);
                 degree = currentDegree;
             }
             txtHeading.setText("Heading: " + degree + " degrees");
-            animateCompass(degree);
+
+            Log.e(TAG, "Rotation change from:" + currentDegree + " to " + degree);
+            if(System.currentTimeMillis() - lastAnimationTimestamp > ANIMATION_DELAY
+                    && Math.abs(currentImageDegree - degree) > 5) {
+                AnimationUtils.animateCompass(currentImageDegree, degree, imgCompass);
+                lastAnimationTimestamp = System.currentTimeMillis();
+                currentImageDegree = degree;
+            }
             currentDegree = -degree;
         }
-    }
-
-    private void animateCompass(float degree) {
-        RotateAnimation ra = new RotateAnimation(currentDegree, -degree,
-                Animation.RELATIVE_TO_SELF, PIVOT_X_VALUE,
-                Animation.RELATIVE_TO_SELF, PIVOT_Y_VALUE);
-        ra.setDuration(210);
-        ra.setFillAfter(true);
-        imgCompass.startAnimation(ra);
-    }
-
-    private void getDegreesByRotation(float[] orientation) {
-        switch (display.getRotation()) {
-            case Surface.ROTATION_0:
-                getPortraitDegrees(orientation);
-                break;
-            case Surface.ROTATION_90:
-                getLandscapeDegrees(orientation);
-                break;
-            case Surface.ROTATION_180:
-                getReversedPortraitDegrees(orientation);
-                break;
-            case Surface.ROTATION_270:
-                getReversedLandscapeDegrees(orientation);
-                break;
-        }
-    }
-
-    protected float[] lowPassFilterSensitive(float[] input, float[] output) {
-        if (output == null) return input;
-
-        for (int i = 0; i < input.length; i++) {
-            output[i] = output[i] + ALPHA * (input[i] - output[i]);
-        }
-        return output;
-    }
-
-    private void getPortraitDegrees(float[] orientation) {
-        currentDegree = Math.round(-orientation[0] * 360 / (2 * 3.14159f));
-    }
-
-    private void getReversedLandscapeDegrees(float[] orientation) {
-        currentDegree = Math.round(-orientation[0] * 360 / (2 * 3.14159f)
-                + LANDSCAPE_DEGREES_DIFFERENCE);
-    }
-
-    private void getReversedPortraitDegrees(float[] orientation) {
-        currentDegree = Math.round(-orientation[0] * 360 / (2 * 3.14159f)
-                + REVERSED_PORTRAIT);
-    }
-
-    private void getLandscapeDegrees(float[] orientation) {
-        currentDegree = Math.round(-orientation[0] * 360 / (2 * 3.14159f)
-                - LANDSCAPE_DEGREES_DIFFERENCE);
     }
 
     @Override
