@@ -18,4 +18,5 @@
     <string name="south">South</string>
     <string name="east">East</string>
     <string name="west">West</string>
+    <string name="view_history">View History</string>
 </resources>

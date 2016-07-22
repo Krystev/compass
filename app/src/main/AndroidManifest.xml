@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".DirectionActivity"></activity>
+        <activity android:name=".LocationHistoryActivity"></activity>
     </application>
 
 </manifest>

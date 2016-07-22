@@ -23,6 +23,7 @@ import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -130,6 +131,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    @OnClick(R.id.btn_view_history)
+    public void onViewHistoryClicked() {
+        startActivity(new Intent(this, LocationHistoryActivity.class));
     }
 
     public void showNoMagneticSensorDialog() {
