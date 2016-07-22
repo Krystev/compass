@@ -48,7 +48,7 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.Loca
     @Override
     public void onBindViewHolder(LocationHolder holder, int position) {
         LocationModel item = data.get(position);
-        holder.position = position;
+        holder.id = item.getId();
         holder.txtLocation.setText(context.getString(R.string.north_offset, item.getNorthOffset()));
         holder.txtTimestamp.setText(dateFormat.format(new Date(item.getTimestamp())));
     }
@@ -65,7 +65,7 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.Loca
         @BindView(R.id.txt_timestamp)
         TextView txtTimestamp;
 
-        int position;
+        int id;
 
         public LocationHolder(View itemView) {
             super(itemView);
@@ -74,7 +74,9 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.Loca
 
         @OnClick(R.id.btn_delete)
         public void onDeleteClicked() {
-            LocationModel item = data.remove(position);
+            LocationModel item = getItemById(id);
+            int position = data.indexOf(item);
+            data.remove(item);
             notifyItemRemoved(position);
             if(listener != null) {
                 listener.onItemRemoved(item);
@@ -82,11 +84,21 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.Loca
         }
     }
 
+    private LocationModel getItemById(int id) {
+        for (LocationModel model :
+                data) {
+            if(model.getId() == id) {
+                return model;
+            }
+        }
+        return null;
+    }
+
     public void setListener(OnItemChangedListener listener) {
         this.listener = listener;
     }
 
-    interface OnItemChangedListener {
+    public interface OnItemChangedListener {
         void onItemRemoved(LocationModel item);
     }
 }

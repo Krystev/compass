@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.inveitix.android.compass.AnimationUtils;
 import com.inveitix.android.compass.LocationCalculationHelper;
 import com.inveitix.android.compass.R;
+import com.inveitix.android.compass.database.FirebaseHelper;
 import com.inveitix.android.compass.database.adapters.LocationDbAdapter;
 import com.inveitix.android.compass.database.models.LocationModel;
 
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     ImageView imgCompass;
 
     Timer saveToDbTimer;
-    private static final long SAVE_TO_DB_DELAY = 2000;
+    private static final long SAVE_TO_DB_DELAY = 20 * 1000;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -86,8 +87,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         saveToDbTimer.schedule(new TimerTask() {
             @Override
             public void run() {
+                LocationModel model = new LocationModel(currentDegree, System.currentTimeMillis());
                 LocationDbAdapter dbAdapter = new LocationDbAdapter(MainActivity.this);
-                dbAdapter.insert(new LocationModel(currentDegree, System.currentTimeMillis()));
+                dbAdapter.insert(model);
+                FirebaseHelper.getInstance().addLocation(model, MainActivity.this);
                 saveToDbWithDelay();
             }
         }, SAVE_TO_DB_DELAY);
