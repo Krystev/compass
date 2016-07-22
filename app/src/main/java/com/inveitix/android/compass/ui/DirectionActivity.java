@@ -1,4 +1,4 @@
-package com.inveitix.android.compass;
+package com.inveitix.android.compass.ui;
 
 import android.Manifest;
 import android.content.IntentSender;
@@ -17,6 +17,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.inveitix.android.compass.LocationCalculationHelper;
+import com.inveitix.android.compass.R;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

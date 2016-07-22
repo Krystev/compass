@@ -1,4 +1,4 @@
-package com.inveitix.android.compass;
+package com.inveitix.android.compass.ui;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +15,9 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.inveitix.android.compass.AnimationUtils;
+import com.inveitix.android.compass.LocationCalculationHelper;
+import com.inveitix.android.compass.R;
 import com.inveitix.android.compass.database.adapters.LocationDbAdapter;
 import com.inveitix.android.compass.database.models.LocationModel;
 
