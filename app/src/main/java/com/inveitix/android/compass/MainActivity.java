@@ -7,18 +7,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.SystemClock;
-import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
-import android.view.Surface;
-import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private static final String TAG = "MainActivity";
     private static final float ANIMATION_DELAY = 200;
+    public static final int ANIMATION_BUFFER = 5;
     private long lastAnimationTimestamp;
 
     @BindView(R.id.txt_heading)
@@ -52,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ButterKnife.bind(this);
         init();
 
-        if(magnetometer == null) {
+        if (magnetometer == null) {
             showNoMagneticSensorDialog();
         }
     }
@@ -96,11 +90,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 currentDegree = LocationCalculationHelper.getDegreesByRotation(display.getRotation(), orientation);
                 degree = currentDegree;
             }
-            txtHeading.setText("Heading: " + degree + " degrees");
+            txtHeading.setText(getString(com.inveitix.android.compass.R.string.degree_message, degree));
 
-            Log.e(TAG, "Rotation change from:" + currentDegree + " to " + degree);
-            if(System.currentTimeMillis() - lastAnimationTimestamp > ANIMATION_DELAY
-                    && Math.abs(currentImageDegree - degree) > 5) {
+            //Animate image if necessary
+            if (System.currentTimeMillis() - lastAnimationTimestamp > ANIMATION_DELAY
+                    && Math.abs(currentImageDegree - degree) > ANIMATION_BUFFER) {
                 AnimationUtils.animateCompass(currentImageDegree, degree, imgCompass);
                 lastAnimationTimestamp = System.currentTimeMillis();
                 currentImageDegree = degree;

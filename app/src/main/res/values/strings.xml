@@ -7,4 +7,15 @@
     <string name="cant_detect_magnetic">Can not detect magnetic field sensor on your device. Do you want to get direction by gps or network ?</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_ok">OK</string>
+    <string name="degree_message">You are %s degrees from North</string>
+    <string name="your_direction_nl">Your direction:\n %s</string>
+    <string name="unknown">Unknown</string>
+    <string name="north">North</string>
+    <string name="north_east">North East</string>
+    <string name="north_west">North West</string>
+    <string name="south_east">South East</string>
+    <string name="south_west">South West</string>
+    <string name="south">South</string>
+    <string name="east">East</string>
+    <string name="west">West</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.inveitix.android.compass;
 
+import android.content.Context;
 import android.view.Surface;
 
 public class LocationCalculationHelper {
@@ -50,4 +51,38 @@ public class LocationCalculationHelper {
         return output;
     }
 
+    public static String getDirectionByLocation(Context context,
+                                         double currentLat, double currentLong,
+                                         double latitude, double longitude) {
+        boolean isNorth = currentLat > latitude;
+        boolean isWest = currentLong < longitude;
+
+        if (isNorth && currentLong == longitude) {
+            return context.getString(R.string.your_direction_nl,
+                    context.getString(R.string.north));
+        } else if (isNorth && !isWest) {
+            return context.getString(R.string.your_direction_nl,
+                    context.getString(R.string.north_east));
+        } else if (isNorth && isWest) {
+            return context.getString(R.string.your_direction_nl,
+                    context.getString(R.string.north_west));
+        } else if (!isNorth && !isWest) {
+            return context.getString(R.string.your_direction_nl,
+                    context.getString(R.string.south_east));
+        } else if (!isNorth && isWest) {
+            return context.getString(R.string.your_direction_nl,
+                    context.getString(R.string.south_west));
+        } else if (!isNorth && currentLong == longitude) {
+            return context.getString(R.string.your_direction_nl,
+                    context.getString(R.string.south));
+        } else if (currentLat == latitude && !isWest) {
+            return context.getString(R.string.your_direction_nl,
+                    context.getString(R.string.east));
+        } else if (currentLat == latitude && isWest) {
+            return context.getString(R.string.your_direction_nl,
+                    context.getString(R.string.west));
+        }
+        return context.getString(R.string.your_direction_nl,
+                context.getString(R.string.unknown));
+    }
 }

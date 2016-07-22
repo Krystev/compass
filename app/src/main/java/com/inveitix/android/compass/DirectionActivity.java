@@ -24,6 +24,10 @@ import java.math.RoundingMode;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * Shown only if the device doesn't have a magnetic sensor
+ * Uses GPS to determine directions
+ */
 public class DirectionActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -134,7 +138,9 @@ public class DirectionActivity extends AppCompatActivity implements
     }
 
     private void updateUI() {
-        txtDirection.setText(getDirectionByLocation());
+        txtDirection.setText(
+                LocationCalculationHelper.getDirectionByLocation(this,
+                        currentLat, currentLong, latitude, longitude));
     }
 
     @Override
@@ -168,34 +174,5 @@ public class DirectionActivity extends AppCompatActivity implements
         BigDecimal bd = new BigDecimal(value);
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
-    }
-
-    public String getDirectionByLocation() {
-        if (currentLat > latitude && currentLong == longitude) {
-            return "Your direction:\n North";
-        } else if (currentLat > latitude && currentLong > longitude) {
-            return "Your direction:\n" +
-                    " North East";
-        } else if (currentLat > latitude && currentLong < longitude) {
-            return "Your direction:\n" +
-                    " North West";
-        } else if (currentLat < latitude && currentLong > longitude) {
-            return "Your direction:\n" +
-                    " South East";
-        } else if (currentLat < latitude && currentLong < longitude) {
-            return "Your direction:\n" +
-                    " South West";
-        } else if (currentLat < latitude && currentLong == longitude) {
-            return "Your direction:\n" +
-                    " South";
-        } else if (currentLat == latitude && currentLong > longitude) {
-            return "Your direction:\n" +
-                    " East";
-        } else if (currentLat == latitude && currentLong > longitude) {
-            return "Your direction:\n" +
-                    " West";
-        }
-        return "Your direction:\n" +
-                " Heading";
     }
 }
