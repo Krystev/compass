@@ -15,6 +15,12 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.inveitix.android.compass.database.adapters.LocationDbAdapter;
+import com.inveitix.android.compass.database.models.LocationModel;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -29,6 +35,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView txtHeading;
     @BindView(R.id.img_compass)
     ImageView imgCompass;
+
+    Timer saveToDbTimer;
+    private static final long SAVE_TO_DB_DELAY = 2000;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -63,6 +72,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onResume();
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+        saveToDbWithDelay();
+    }
+
+    private void saveToDbWithDelay() {
+        if(saveToDbTimer == null) {
+            saveToDbTimer = new Timer(true);
+        }
+        saveToDbTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                LocationDbAdapter dbAdapter = new LocationDbAdapter(MainActivity.this);
+                dbAdapter.insert(new LocationModel(currentDegree, System.currentTimeMillis()));
+                saveToDbWithDelay();
+            }
+        }, SAVE_TO_DB_DELAY);
     }
 
     @Override
