@@ -23,4 +23,11 @@
         android:layout_margin="40dp"
         android:src="@drawable/compass" />
 
+    <Button
+        android:id="@+id/btn_view_history"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/view_history" />
+
 </RelativeLayout>
