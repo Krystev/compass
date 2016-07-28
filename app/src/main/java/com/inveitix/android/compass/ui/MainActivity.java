@@ -1,5 +1,7 @@
 package com.inveitix.android.compass.ui;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -7,6 +9,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,13 +20,8 @@ import android.widget.TextView;
 
 import com.inveitix.android.compass.AnimationUtils;
 import com.inveitix.android.compass.LocationCalculationHelper;
+import com.inveitix.android.compass.LocationReceiver;
 import com.inveitix.android.compass.R;
-import com.inveitix.android.compass.database.FirebaseHelper;
-import com.inveitix.android.compass.database.adapters.LocationDbAdapter;
-import com.inveitix.android.compass.database.models.LocationModel;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,19 +29,18 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
+    public static final int ANIMATION_BUFFER = 5;
     private static final String TAG = "MainActivity";
     private static final float ANIMATION_DELAY = 200;
-    public static final int ANIMATION_BUFFER = 5;
-    private long lastAnimationTimestamp;
-
+    private static final long SAVE_TO_DB_DELAY = 60 * 1000;
     @BindView(R.id.txt_heading)
     TextView txtHeading;
     @BindView(R.id.img_compass)
     ImageView imgCompass;
 
-    Timer saveToDbTimer;
-    private static final long SAVE_TO_DB_DELAY = 20 * 1000;
-
+    AlarmManager alarmMgr;
+    Handler handler;
+    private long lastAnimationTimestamp;
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
@@ -70,6 +67,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         this.accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         this.display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        savingToDbStart();
+    }
+
+    private void savingToDbStart() {
+        handler = new Handler();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                saveToDbWithDelay();
+                handler.postDelayed(this, SAVE_TO_DB_DELAY);
+            }
+        });
     }
 
     @Override
@@ -81,25 +90,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void saveToDbWithDelay() {
-        if(saveToDbTimer == null) {
-            saveToDbTimer = new Timer(true);
+        if (alarmMgr == null) {
+            alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
         }
-        saveToDbTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                LocationModel model = new LocationModel(currentDegree, System.currentTimeMillis());
-                LocationDbAdapter dbAdapter = new LocationDbAdapter(MainActivity.this);
-                dbAdapter.insert(model);
-                FirebaseHelper.getInstance().addLocation(model, MainActivity.this);
-                saveToDbWithDelay();
-            }
-        }, SAVE_TO_DB_DELAY);
+
+        Intent intent = new Intent(this, LocationReceiver.class);
+        intent.putExtra("degree", currentDegree);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), SAVE_TO_DB_DELAY,
+                pendingIntent);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
+        if (alarmMgr != null) {
+            cancelSavingHistory();
+        }
+    }
+
+    private void cancelSavingHistory() {
+        alarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, LocationReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        alarmMgr.cancel(pendingIntent);
     }
 
     @Override
@@ -121,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 currentDegree = LocationCalculationHelper.getDegreesByRotation(display.getRotation(), orientation);
                 degree = currentDegree;
             }
-            txtHeading.setText(getString(com.inveitix.android.compass.R.string.degree_message, degree));
+            txtHeading.setText(getString(com.inveitix.android.compass.R.string.degree_message, -degree));
 
             //Animate image if necessary
             if (System.currentTimeMillis() - lastAnimationTimestamp > ANIMATION_DELAY
