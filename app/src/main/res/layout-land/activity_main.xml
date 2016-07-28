@@ -21,4 +21,13 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:src="@drawable/compass" />
+
+    <Button
+        android:id="@+id/btn_view_history"
+        android:layout_width="250dp"
+        android:layout_margin="20dp"
+        android:layout_toRightOf="@id/img_compass"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/view_history" />
 </RelativeLayout>
