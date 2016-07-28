@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="start"
-            android:text="06/24/2016\n16:54:32"
+            android:text="@string/_06_24_2016_n16_54_32"
             android:textAlignment="viewStart"
             android:textColor="@android:color/darker_gray"
             android:textSize="20sp" />
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="12dp"
             android:layout_weight="1"
-            android:text="North offset 24 degree"
+            android:text="@string/north_offset_24_degree"
             android:textColor="@android:color/black"
             android:textSize="20sp" />
 
