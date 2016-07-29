@@ -16,8 +16,8 @@ public class LocationReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        SharedPreferences sharedPref = context.getSharedPreferences(Constants.SHARED_PREFS_NAME, Context.MODE_PRIVATE);
-        float currentDegree = sharedPref.getFloat(Constants.DEGREE, DEF_VALUE);
+        SharedPreferences sharedPref = context.getSharedPreferences(Constants.SP_NAME, Context.MODE_PRIVATE);
+        float currentDegree = sharedPref.getFloat(Constants.SP_DEGREE, DEF_VALUE);
         LocationModel model = new LocationModel(currentDegree, System.currentTimeMillis());
         LocationDbAdapter dbAdapter = new LocationDbAdapter(context);
         dbAdapter.insert(model);
