@@ -5,11 +5,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     ImageView imgCompass;
 
     AlarmManager alarmMgr;
-    Handler handler;
     private long lastAnimationTimestamp;
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -49,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float[] gravity;
     private float[] geomagnetic;
     private Display display;
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,18 +67,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         this.accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         this.display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        savingToDbStart();
-    }
-
-    private void savingToDbStart() {
-        handler = new Handler();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                saveToDbWithDelay();
-                handler.postDelayed(this, SAVE_TO_DB_DELAY);
-            }
-        });
+        this.sharedPref = this.getSharedPreferences("SharedPrefs", Context.MODE_PRIVATE);
     }
 
     @Override
@@ -95,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         Intent intent = new Intent(this, LocationReceiver.class);
-        intent.putExtra("degree", currentDegree);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), SAVE_TO_DB_DELAY,
                 pendingIntent);
@@ -146,7 +134,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 currentImageDegree = degree;
             }
             currentDegree = -degree;
+            saveDegreeValue(currentDegree);
         }
+    }
+
+    private void saveDegreeValue(float degree) {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putFloat("degree", degree);
+        editor.apply();
     }
 
     @Override
