@@ -21,6 +21,8 @@
         </activity>
         <activity android:name=".ui.DirectionActivity"></activity>
         <activity android:name=".ui.LocationHistoryActivity"></activity>
+        <receiver android:name=".LocationReceiver"
+            android:exported="false"/>
     </application>
 
 </manifest>
