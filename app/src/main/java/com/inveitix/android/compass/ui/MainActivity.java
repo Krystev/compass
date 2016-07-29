@@ -22,6 +22,7 @@ import com.inveitix.android.compass.AnimationUtils;
 import com.inveitix.android.compass.LocationCalculationHelper;
 import com.inveitix.android.compass.LocationReceiver;
 import com.inveitix.android.compass.R;
+import com.inveitix.android.compass.constants.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,10 +30,8 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    public static final int ANIMATION_BUFFER = 5;
     private static final String TAG = "MainActivity";
-    private static final float ANIMATION_DELAY = 200;
-    private static final long SAVE_TO_DB_DELAY = 60 * 1000;
+
     @BindView(R.id.txt_heading)
     TextView txtHeading;
     @BindView(R.id.img_compass)
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         this.accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         this.display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        this.sharedPref = this.getSharedPreferences("SharedPrefs", Context.MODE_PRIVATE);
+        this.sharedPref = this.getSharedPreferences(Constants.SHARED_PREFS_NAME, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         Intent intent = new Intent(this, LocationReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), SAVE_TO_DB_DELAY,
+        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), Constants.SAVE_TO_DB_DELAY,
                 pendingIntent);
     }
 
@@ -93,9 +92,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
-        if (alarmMgr != null) {
-            cancelSavingHistory();
-        }
+        cancelSavingHistory();
     }
 
     private void cancelSavingHistory() {
@@ -127,20 +124,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             txtHeading.setText(getString(com.inveitix.android.compass.R.string.degree_message, -degree));
 
             //Animate image if necessary
-            if (System.currentTimeMillis() - lastAnimationTimestamp > ANIMATION_DELAY
-                    && Math.abs(currentImageDegree - degree) > ANIMATION_BUFFER) {
+            if (System.currentTimeMillis() - lastAnimationTimestamp > Constants.ANIMATION_DELAY
+                    && Math.abs(currentImageDegree - degree) > Constants.ANIMATION_BUFFER) {
                 AnimationUtils.animateCompass(currentImageDegree, degree, imgCompass);
                 lastAnimationTimestamp = System.currentTimeMillis();
                 currentImageDegree = degree;
             }
             currentDegree = -degree;
-            saveDegreeValue(currentDegree);
+            saveDegreeToSharedPrefs(currentDegree);
         }
     }
 
-    private void saveDegreeValue(float degree) {
+    private void saveDegreeToSharedPrefs(float degree) {
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putFloat("degree", degree);
+        editor.putFloat(Constants.DEGREE, degree);
         editor.apply();
     }
 
